@@ -1,0 +1,5 @@
+#!/bin/bash
+cd /afs/cern.ch/user/h/honi/CMSSW_7_5_5_patch3/src
+eval `scramv1 runtime -sh` 
+
+python /afs/cern.ch/user/h/honi/CMSSW_7_5_5_patch3/src/PythonScript_pprefEvtVolumeSizeForPDs/AOD/printppPDsinDAS_AOD.py &> /afs/cern.ch/user/h/honi/CMSSW_7_5_5_patch3/src/PythonScript_pprefEvtVolumeSizeForPDs/AOD/output_printppPDsinDAS_AOD.txt
