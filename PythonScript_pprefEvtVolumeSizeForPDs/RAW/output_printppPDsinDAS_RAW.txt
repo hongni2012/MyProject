@@ -1,0 +1,27 @@
+
+ RAW statistics for Run2015E-v1 datasets in DAS at 11/23/2015 15:7:55 (Geneva time)
+
++--------------------+---------------------+---------------+------------------------+
+|      PD Names      | Number of Events(K) | File Size(GB) | average Event Size(MB) |
++--------------------+---------------------+---------------+------------------------+
+|   HIMinimumBias1   |       1457.605      |    782.256    |         0.537          |
+|   L1MinimumBias    |       4772.489      |    492.904    |         0.103          |
+|      EmptyBX       |      30836.332      |    2056.416   |         0.067          |
+|  HighPtLowerJets   |      13246.701      |    1937.734   |         0.146          |
+|    HighPtJet80     |       6266.728      |    966.568    |         0.154          |
+| HighPtLowerPhotons |       7319.166      |    1024.931   |         0.140          |
+| HighPtPhoton30AndZ |       2906.369      |    438.254    |         0.151          |
+|     HIOniaTnP      |       555.803       |    308.194    |         0.555          |
+|      HIEWQExo      |       555.419       |    307.979    |         0.554          |
+|       HIOnia       |       555.343       |    307.934    |         0.554          |
+|     FullTrack      |       251.301       |     36.565    |         0.146          |
+|  HighMultiplicity  |       1786.214      |    307.496    |         0.172          |
+|     ppForward      |      31339.769      |    2844.641   |         0.091          |
+|    HeavyFlavor     |       9018.216      |    1313.388   |         0.146          |
+|    HIHardProbes    |       554.875       |    307.672    |         0.554          |
++--------------------+---------------------+---------------+------------------------+
+
+ RAW File Summary:
+ Total Size =  13432.9 GB
+ Event Number =  111422330 events
+ Average Event Size =  0.121 MB/event

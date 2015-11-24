@@ -1,0 +1,27 @@
+
+ AOD statistics for Run2015E-v1 datasets in DAS at 11/23/2015 15:16:55 (Geneva time)
+
++--------------------+---------------------+---------------+------------------------+
+|      PD Names      | Number of Events(K) | File Size(GB) | average Event Size(MB) |
++--------------------+---------------------+---------------+------------------------+
+|   HIMinimumBias1   |       1457.605      |     96.860    |         0.066          |
+|   L1MinimumBias    |       199.164       |     2.362     |         0.012          |
+|      EmptyBX       |      23129.314      |     97.792    |         0.004          |
+|  HighPtLowerJets   |       328.263       |     11.515    |         0.035          |
+|    HighPtJet80     |        12.901       |     0.679     |         0.053          |
+| HighPtLowerPhotons |        38.473       |     0.746     |         0.019          |
+| HighPtPhoton30AndZ |        9.816        |     0.527     |         0.054          |
+|     HIOniaTnP      |       555.803       |     38.220    |         0.069          |
+|      HIEWQExo      |       555.419       |     38.198    |         0.069          |
+|       HIOnia       |       555.343       |     38.182    |         0.069          |
+|     FullTrack      |        28.755       |     1.067     |         0.037          |
+|  HighMultiplicity  |       315.418       |     14.264    |         0.045          |
+|     ppForward      |        64.684       |     0.873     |         0.014          |
+|    HeavyFlavor     |       103.247       |     2.920     |         0.028          |
+|    HIHardProbes    |       554.875       |     38.159    |         0.069          |
++--------------------+---------------------+---------------+------------------------+
+
+ AOD File Summary:
+ Total Size =  382.4 GB
+ Event Number =  27909080 events
+ Average Event Size =  0.014 MB/event
