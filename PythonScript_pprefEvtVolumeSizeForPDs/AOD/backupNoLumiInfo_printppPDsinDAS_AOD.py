@@ -6,7 +6,6 @@
 from datetime import datetime
 import os
 from prettytable import PrettyTable
-from prettytable import ALL
 
 Dir = "/afs/cern.ch/user/h/honi/CMSSW_7_5_5_patch3/src/PythonScript_pprefEvtVolumeSizeForPDs/AOD"
  
@@ -27,11 +26,10 @@ pdNames.append("HeavyFlavor")
 pdNames.append("HIHardProbes")
 
 pdNum = len(pdNames)
-x = PrettyTable(["PDs","File Size(GB)","#Events(K)","#Lumis","avg. Event Size(MB)","avg. Lumi Size (MB)"])
+x = PrettyTable(["PD Names","Number of Events(K)","File Size(GB)","average Event Size(MB)"])
 x.align["PD Name"] = "l"
 x.padding_width = 1
 x.float_format = .3;
-x.hrules = ALL
 
 now = datetime.now()
 mm = str(now.month)
@@ -45,7 +43,6 @@ print ""
  
 totalAODSize = 0
 totalAODEvents = 0
-totalLumis = 0
 for pdName in pdNames:
     dasAODPathName = '/' + pdName + '/Run2015E-PromptReco-v1/AOD'
     findEventsAODCommand = Dir + '/das.py --limit=1000 --format=plain --query="dataset dataset=' + dasAODPathName + ' | grep dataset.nevents" > tmp.txt ; tail -1 tmp.txt > events.txt'
@@ -70,46 +67,22 @@ for pdName in pdNames:
     for line in fileInput:
         AODFileSize = line.rstrip('\n')
         if(AODFileSize == '[]'):
-            AODFileSizeGB = 0
+              AODFileSizeGB = 0
         else:
-            AODFileSizeGB = int(AODFileSize)/1.0e9
-            if(thisEvents > 0):
-               AODEventSize = AODFileSizeGB*1.0e3/thisEvents
+              AODFileSizeGB = int(AODFileSize)/1.0e9
+              if(thisEvents > 0):
+                   AODEventSize = AODFileSizeGB*1.0e3/thisEvents
         totalAODSize += AODFileSizeGB
     fileInput.close()
 
-    countLumiAODCommand = Dir + '/das.py --limit=1000 --format=plain --query="run,lumi dataset=' + dasAODPathName + ' | count(lumi)" > tmp.txt ; tail -1 tmp.txt > lumicounts.txt'
-    os.system(countLumiAODCommand)
-    fileInput = open('lumicounts.txt','r')
-    thisLumis = 0
-    for line in fileInput:
-        nLumis = line.strip('count(lumi)=')
-        if(nLumis != '[]'):
-            thisLumis = int(nLumis)
-        totalLumis += thisLumis
-
-    if(thisLumis == 0):
-        FileSizePerLumi = 0
-    else:
-        FileSizePerLumi = AODFileSizeGB*1.0e3/thisLumis
-    fileInput.close()
-   
-    x.add_row([pdName,AODFileSizeGB,nEventsM,thisLumis,AODEventSize,FileSizePerLumi])
+    x.add_row([pdName,nEventsM,AODFileSizeGB,AODEventSize])
 print x
 
 averageEventSize = totalAODSize*1.0e3/totalAODEvents
-if(totalLumis != 0):
-    averageFileSizePerLumi = totalAODSize*1.0e3/totalLumis
-else:
-    averageFileSizePerLumi = 0
-
 print "\n AOD File Summary:"
 print " Total Size = ", 
 print "%0.1f %s" % (totalAODSize, "GB")
 print " Event Number = ", totalAODEvents, "events"
-print " avg. Event Size = ", 
+print " Average Event Size = ", 
 print "%0.3f %s" % (averageEventSize, "MB/event")
-print " avg. Lumi Size = ",
-print "%0.3f %s" % (averageFileSizePerLumi, "MB/Lumi")
-
 exit()
