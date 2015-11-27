@@ -6,6 +6,7 @@
 from datetime import datetime
 import os
 from prettytable import PrettyTable
+from prettytable import ALL
 
 Dir = "/afs/cern.ch/user/h/honi/CMSSW_7_5_5_patch3/src/PythonScript_PbPbEvtVolumeSizeForPDs/RAW"
  
@@ -23,10 +24,11 @@ pdNames.append("HIOniaTnP")
 pdNames.append("HIPhoton40AndZ")
 
 pdNum = len(pdNames)
-x = PrettyTable(["PD Names","Number of Events(K)","File Size(GB)","average Event Size(MB)"])
+x = PrettyTable(["PDs","File Size(GB)","#Events(K)","#Lumis","avg. Event Size(MB)","avg. Lumi Size (MB)"])
 x.align["PD Name"] = "l"
 x.padding_width = 1
 x.float_format = .3;
+x.hrules = ALL
 
 now = datetime.now()
 mm = str(now.month)
@@ -40,6 +42,7 @@ print ""
  
 totalRAWSize = 0
 totalRAWEvents = 0
+totalLumis = 0
 for pdName in pdNames:
     dasRAWPathName = '/' + pdName + '/HIRun2015-v1/RAW'
     findEventsRAWCommand = Dir + '/das.py --limit=1000 --format=plain --query="dataset dataset=' + dasRAWPathName + ' | grep dataset.nevents" > tmp.txt ; tail -1 tmp.txt > events.txt'
@@ -71,15 +74,39 @@ for pdName in pdNames:
                    RAWEventSize = RAWFileSizeGB*1.0e3/thisEvents
         totalRAWSize += RAWFileSizeGB
     fileInput.close()
+   
+    countLumiRAWCommand = Dir + '/das.py --limit=1000 --format=plain --query="run,lumi dataset=' + dasRAWPathName + ' | count(lumi)" > tmp.txt ; tail -1 tmp.txt > lumicounts.txt'
+    os.system(countLumiRAWCommand)
+    fileInput = open('lumicounts.txt','r')
+    thisLumis = 0
+    for line in fileInput:
+        nLumis = line.strip('count(lumi)=')
+        if(nLumis != '[]'):
+            thisLumis = int(nLumis)
+        totalLumis += thisLumis
 
-    x.add_row([pdName,nEventsM,RAWFileSizeGB,RAWEventSize])
+    if(thisLumis == 0):
+        FileSizePerLumi = 0
+    else:
+        FileSizePerLumi = RAWFileSizeGB*1.0e3/thisLumis
+    fileInput.close()    
+
+    x.add_row([pdName,RAWFileSizeGB,nEventsM,thisLumis,RAWEventSize,FileSizePerLumi])
 print x
 
 averageEventSize = totalRAWSize*1.0e3/totalRAWEvents
+if(totalLumis != 0):
+    averageFileSizePerLumi = totalRAWSize*1.0e3/totalLumis
+else:
+    averageFileSizePerLumi = 0
+
 print "\n RAW File Summary:"
 print " Total Size = ", 
 print "%0.1f %s" % (totalRAWSize, "GB")
 print " Event Number = ", totalRAWEvents, "events"
-print " Average Event Size = ", 
+print " avg. Event Size = ", 
 print "%0.3f %s" % (averageEventSize, "MB/event")
+print " avg. Lumi Size = ",
+print "%0.3f %s" % (averageFileSizePerLumi, "MB/Lumi")
+
 exit()
