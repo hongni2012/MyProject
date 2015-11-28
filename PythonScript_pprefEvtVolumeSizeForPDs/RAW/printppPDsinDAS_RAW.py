@@ -8,7 +8,7 @@ import os
 from prettytable import PrettyTable
 from prettytable import ALL
 
-Dir = "/afs/cern.ch/user/h/honi/CMSSW_7_5_5_patch3/src/PythonScript_pprefEvtVolumeSizeForPDs/AOD"
+Dir = "/afs/cern.ch/user/h/honi/CMSSW_7_5_5_patch3/src/PythonScript_pprefEvtVolumeSizeForPDs/RAW"
 
 pdNames = ["MinimumBias1"]
 pdNames.append("MinimumBias16")
@@ -39,19 +39,20 @@ yyyy = str(now.year)
 hour = str(now.hour)
 mi = str(now.minute)
 ss = str(now.second)
-print "\n AOD statistics for Run2015E-PromptReco-v1 datasets in DAS at", mm + "/" + dd + "/" + yyyy + " " + hour + ":" + mi + ":" + ss, "(Geneva time)"
-totalAODSize = 0
-totalAODEvents = 0
+print "\n RAW statistics for Run2015E-v1 datasets in DAS at", mm + "/" + dd + "/" + yyyy + " " + hour + ":" + mi + ":" + ss, "(Geneva time)"
+ 
+totalRAWSize = 0
+totalRAWEvents = 0
 totalLumis = 0
 MaxFileSize = 0
 
 for pdName in pdNames:
-    dasAODPathName = '/' + pdName + '/Run2015E-PromptReco-v1/AOD'
-    findEventsAODCommand = Dir + '/das.py --limit=1000 --format=plain --query="dataset dataset=' + dasAODPathName + ' | grep dataset.nevents" > tmp.txt ; tail -1 tmp.txt > events.txt'
-    os.system(findEventsAODCommand)
+    dasRAWPathName = '/' + pdName + '/Run2015E-v1/RAW'
+    findEventsRAWCommand = Dir + '/das.py --limit=1000 --format=plain --query="dataset dataset=' + dasRAWPathName + ' | grep dataset.nevents" > tmp.txt ; tail -1 tmp.txt > events.txt'
+    os.system(findEventsRAWCommand)
     fileInput = open('events.txt', 'r')
     thisEvents = 0
-    AODEventSize = 0
+    RAWEventSize = 0
     for line in fileInput:
         nEvents = line.rstrip('\n')
         if(nEvents != '[]'):
@@ -60,41 +61,43 @@ for pdName in pdNames:
         else:
             nEvents = 0
             nEventsK = 0
-        totalAODEvents += thisEvents
+        totalRAWEvents += thisEvents
     fileInput.close()
  
-    findSizeAODCommand = Dir + '/das.py --limit=1000 --format=plain --query="dataset dataset=' + dasAODPathName + ' | grep dataset.size" > tmp.txt ; tail -1 tmp.txt > size.txt'
-    os.system(findSizeAODCommand)
+    findSizeRAWCommand = Dir + '/das.py --limit=1000 --format=plain --query="dataset dataset=' + dasRAWPathName + ' | grep dataset.size" > tmp.txt ; tail -1 tmp.txt > size.txt'
+    os.system(findSizeRAWCommand)
     fileInput = open('size.txt', 'r')
     for line in fileInput:
-        AODFileSize = line.rstrip('\n')
-        if(AODFileSize == '[]'):
-            AODFileSizeGB = 0
+        RAWFileSize = line.rstrip('\n')
+        if(RAWFileSize == '[]'):
+            RAWFileSizeGB = 0
         else:
-            AODFileSizeGB = int(AODFileSize)/1.0e9
+            RAWFileSizeGB = int(RAWFileSize)/1.0e9
             if(thisEvents > 0):
-               AODEventSize = AODFileSizeGB*1.0e3/thisEvents
-        totalAODSize += AODFileSizeGB
+               RAWEventSize = RAWFileSizeGB*1.0e3/thisEvents
+        totalRAWSize += RAWFileSizeGB
     fileInput.close()
 
-    countLumiAODCommand = Dir + '/das.py --limit=1000 --format=plain --query="run,lumi dataset=' + dasAODPathName + ' | count(lumi)" > tmp.txt ; tail -1 tmp.txt > lumicounts.txt'
-    os.system(countLumiAODCommand)
+    countLumiRAWCommand = Dir + '/das.py --limit=1000 --format=plain --query="run,lumi dataset=' + dasRAWPathName + ' | count(lumi)" > tmp.txt ; tail -1 tmp.txt > lumicounts.txt'
+    os.system(countLumiRAWCommand)
     fileInput = open('lumicounts.txt','r')
     thisLumis = 0
     for line in fileInput:
         nLumis = line.strip('count(lumi)=N/A')
         if(nLumis != '[]'):
             thisLumis = int(nLumis)
+        else:
+            nLumis = 0
         totalLumis += thisLumis
 
     if(thisLumis == 0):
         FileSizePerLumi = 0
     else:
-        FileSizePerLumi = AODFileSizeGB/thisLumis
+        FileSizePerLumi = RAWFileSizeGB/thisLumis
     fileInput.close()
 
-    findMaxFileAODCommand = Dir + '/das.py --limit=1000 --format=plain --query="file dataset=' + dasAODPathName + ' | max(file.size)" > tmp.txt ; tail -1 tmp.txt > maxfilesize.txt'
-    os.system(findMaxFileAODCommand)
+    findMaxFileRAWCommand = Dir + '/das.py --limit=1000 --format=plain --query="file dataset=' + dasRAWPathName + ' | max(file.size)" > tmp.txt ; tail -1 tmp.txt > maxfilesize.txt'
+    os.system(findMaxFileRAWCommand)
     fileInput = open('maxfilesize.txt','r')
     thisMaxSize = 0
     for line in fileInput:
@@ -103,24 +106,24 @@ for pdName in pdNames:
             thisMaxSize = int(maxsize)/1.0e9
     fileInput.close()
    
-    x.add_row([pdName,int(AODFileSizeGB),thisMaxSize,int(nEventsK),thisLumis,AODEventSize,FileSizePerLumi])
+    x.add_row([pdName,int(RAWFileSizeGB),thisMaxSize,int(nEventsK),thisLumis,RAWEventSize,FileSizePerLumi])
    
     if(MaxFileSize < thisMaxSize):
         MaxFileSize = thisMaxSize
 
-averageEventSize = totalAODSize*1.0e3/totalAODEvents
+averageEventSize = totalRAWSize*1.0e3/totalRAWEvents
 if(totalLumis != 0):
-    averageFileSizePerLumi = totalAODSize/totalLumis
+    averageFileSizePerLumi = totalRAWSize/totalLumis
 else:
     averageFileSizePerLumi = 0
 
-x.add_row(['AOD',int(totalAODSize),MaxFileSize,int(totalAODEvents/1.0e3),totalLumis,averageEventSize,averageFileSizePerLumi])            
+x.add_row(['RAW',int(totalRAWSize),MaxFileSize,int(totalRAWEvents/1.0e3),totalLumis,averageEventSize,averageFileSizePerLumi]) 
 print x
 
-print "\n AOD File Summary:"
+print "\n RAW File Summary:"
 print " Total Size = ", 
-print "%0.1f %s" % (totalAODSize, "GB")
-print " Event Number = ", totalAODEvents, "events"
+print "%0.1f %s" % (totalRAWSize, "GB")
+print " Event Number = ", totalRAWEvents, "events"
 print " avg. Event Size = ", 
 print "%0.3f %s" % (averageEventSize, "MB/event")
 print " Lumi Number = ", totalLumis, "Lumis"

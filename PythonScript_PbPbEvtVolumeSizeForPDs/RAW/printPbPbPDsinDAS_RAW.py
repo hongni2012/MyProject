@@ -10,21 +10,21 @@ from prettytable import ALL
 
 Dir = "/afs/cern.ch/user/h/honi/CMSSW_7_5_5_patch3/src/PythonScript_PbPbEvtVolumeSizeForPDs/RAW"
  
-pdNames = ["HIEWQExo"]
-pdNames.append("HIFlowCorr")
+pdNames=["HIMinimumBias1"]
+pdNames.append("HIMinimumBias2")
 pdNames.append("HIForward")
+pdNames.append("HIPhoton40AndZ")
+pdNames.append("HIEWQExo")
+pdNames.append("HIOniaCentral30L2L3")
+pdNames.append("HIOniaPeripheral30100")
+pdNames.append("HIOniaL1DoubleMu0")
 pdNames.append("HIHardProbes")
 pdNames.append("HIHardProbesPeripheral")
-pdNames.append("HIMinimumBias1")
-pdNames.append("HIMinimumBias2")
-pdNames.append("HIOniaCentral30L2L3")
-pdNames.append("HIOniaL1DoubleMu0")
-pdNames.append("HIOniaPeripheral30100")
+pdNames.append("HIFlowCorr")
 pdNames.append("HIOniaTnP")
-pdNames.append("HIPhoton40AndZ")
 
 pdNum = len(pdNames)
-x = PrettyTable(["PDs","File Size(GB)","#Events(K)","#Lumis","avg. Event Size(MB)","avg. Lumi Size (MB)"])
+x = PrettyTable(["PDs","File Size(GB)","Max File(GB)","#Evts(K)","#Lumis","avg. Evt Size(MB)","avg. Lumi Size (GB)"])
 x.align["PD Name"] = "l"
 x.padding_width = 1
 x.float_format = .3;
@@ -43,6 +43,8 @@ print ""
 totalRAWSize = 0
 totalRAWEvents = 0
 totalLumis = 0
+MaxFileSize = 0
+
 for pdName in pdNames:
     dasRAWPathName = '/' + pdName + '/HIRun2015-v1/RAW'
     findEventsRAWCommand = Dir + '/das.py --limit=1000 --format=plain --query="dataset dataset=' + dasRAWPathName + ' | grep dataset.nevents" > tmp.txt ; tail -1 tmp.txt > events.txt'
@@ -53,11 +55,11 @@ for pdName in pdNames:
     for line in fileInput:
         nEvents = line.rstrip('\n')
         if(nEvents != '[]'):
-            nEventsM = int(nEvents)/1.0e3 
+            nEventsK = int(nEvents)/1.0e3 
             thisEvents = int(nEvents)
         else:
             nEvents = 0
-            nEventsM = 0
+            nEventsK = 0
         totalRAWEvents += thisEvents
     fileInput.close()
  
@@ -80,7 +82,7 @@ for pdName in pdNames:
     fileInput = open('lumicounts.txt','r')
     thisLumis = 0
     for line in fileInput:
-        nLumis = line.strip('count(lumi)=')
+        nLumis = line.strip('count(lumi)=N/A')
         if(nLumis != '[]'):
             thisLumis = int(nLumis)
         totalLumis += thisLumis
@@ -88,17 +90,32 @@ for pdName in pdNames:
     if(thisLumis == 0):
         FileSizePerLumi = 0
     else:
-        FileSizePerLumi = RAWFileSizeGB*1.0e3/thisLumis
+        FileSizePerLumi = RAWFileSizeGB/thisLumis
     fileInput.close()    
+    
+    findMaxFileRAWCommand = Dir + '/das.py --limit=1000 --format=plain --query="file dataset=' + dasRAWPathName + ' | max(file.size)" > tmp.txt ; tail -1 tmp.txt > maxfilesize.txt'
+    os.system(findMaxFileRAWCommand)
+    fileInput = open('maxfilesize.txt','r')
+    thisMaxSize = 0
+    for line in fileInput:
+        maxsize = line.strip('max(file.size)=')
+        if(maxsize != '[]'):
+            thisMaxSize = int(maxsize)/1.0e9
+    fileInput.close()
 
-    x.add_row([pdName,RAWFileSizeGB,nEventsM,thisLumis,RAWEventSize,FileSizePerLumi])
-print x
+    x.add_row([pdName,int(RAWFileSizeGB),thisMaxSize,int(nEventsK),thisLumis,RAWEventSize,FileSizePerLumi])
 
+    if(MaxFileSize < thisMaxSize):
+        MaxFileSize = thisMaxSize 
+   
 averageEventSize = totalRAWSize*1.0e3/totalRAWEvents
 if(totalLumis != 0):
-    averageFileSizePerLumi = totalRAWSize*1.0e3/totalLumis
+    averageFileSizePerLumi = totalRAWSize/totalLumis
 else:
     averageFileSizePerLumi = 0
+x.add_row(['RAW',int(totalRAWSize),MaxFileSize,int(totalRAWEvents/1.0e3),totalLumis,averageEventSize,averageFileSizePerLumi])
+
+print x
 
 print "\n RAW File Summary:"
 print " Total Size = ", 
@@ -106,7 +123,9 @@ print "%0.1f %s" % (totalRAWSize, "GB")
 print " Event Number = ", totalRAWEvents, "events"
 print " avg. Event Size = ", 
 print "%0.3f %s" % (averageEventSize, "MB/event")
+print " Lumi Number = ", totalLumis, "Lumis"
 print " avg. Lumi Size = ",
-print "%0.3f %s" % (averageFileSizePerLumi, "MB/Lumi")
+print "%0.3f %s" % (averageFileSizePerLumi, "GB/Lumi")
+print "\n"
 
 exit()
