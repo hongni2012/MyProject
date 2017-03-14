@@ -1,0 +1,2 @@
+se8.accre.vanderbilt.edu:2812/lio/lfs/cms/se-test
+se9.accre.vanderbilt.edu:/lio/lfs/cms/se-test
